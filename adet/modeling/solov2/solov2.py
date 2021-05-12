@@ -722,7 +722,7 @@ class SOLOv2MaskHead(nn.Module):
             pass
         """
         assert len(features) == self.num_levels, \
-            print("The number of input features should be equal to the supposed level.")
+            "The number of input features should be equal to the supposed level."
 
         # bottom features first.
         feature_add_all_level = self.convs_all_levels[0](features[0])
