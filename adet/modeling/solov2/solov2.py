@@ -738,18 +738,18 @@ class SOLOv2MaskHead(nn.Module):
 
         # bottom features first.
         feature_add_all_level = self.convs_all_levels[0](features[0])
-        for i in range(1, self.num_levels):
-            mask_feat = features[i]
-            if i == 3:  # add for coord.
-                x_range = torch.linspace(-1, 1, mask_feat.shape[-1], device=mask_feat.device)
-                y_range = torch.linspace(-1, 1, mask_feat.shape[-2], device=mask_feat.device)
-                y, x = torch.meshgrid(y_range, x_range)
-                y = y.expand([mask_feat.shape[0], 1, -1, -1])
-                x = x.expand([mask_feat.shape[0], 1, -1, -1])
-                coord_feat = torch.cat([x, y], 1)
-                mask_feat = torch.cat([mask_feat, coord_feat], 1)
-            # add for top features.
-            feature_add_all_level += self.convs_all_levels[i](mask_feat)
+        feature_add_all_level += self.convs_all_levels[1](features[1])
+        feature_add_all_level += self.convs_all_levels[2](features[2])
+
+        mask_feat = features[3]
+        x_range = torch.linspace(-1, 1, mask_feat.shape[-1], device=mask_feat.device)
+        y_range = torch.linspace(-1, 1, mask_feat.shape[-2], device=mask_feat.device)
+        y, x = torch.meshgrid(y_range, x_range)
+        y = y.expand([mask_feat.shape[0], 1, -1, -1])
+        x = x.expand([mask_feat.shape[0], 1, -1, -1])
+        coord_feat = torch.cat([x, y], 1)
+        mask_feat = torch.cat([mask_feat, coord_feat], 1)
+        feature_add_all_level += self.convs_all_levels[3](mask_feat)
 
         mask_pred = self.conv_pred(feature_add_all_level)
         return mask_pred
