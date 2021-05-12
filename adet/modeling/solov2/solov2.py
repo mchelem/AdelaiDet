@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import math
-from typing import List
+from typing import List, Dict, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -92,7 +92,7 @@ class SOLOv2(nn.Module):
     def normalizer(self, x):
          return (x - self._pixel_mean) / self._pixel_std
 
-    def forward(self, batched_inputs):
+    def forward(self, batched_inputs: List[Dict[str, torch.Tensor]]) -> List[Dict[str, Instances]]:
         """
         Args:
             batched_inputs: a list, batched outputs of :class:`DetectionTransform` .
@@ -144,7 +144,7 @@ class SOLOv2(nn.Module):
             return results
 
 
-    def preprocess_image(self, batched_inputs):
+    def preprocess_image(self, batched_inputs: List[Dict[str, torch.Tensor]]):
         """
         Normalize, pad and batch the input images.
         """
@@ -337,7 +337,7 @@ class SOLOv2(nn.Module):
                 'loss_cate': loss_cate}
 
     @staticmethod
-    def split_feats(feats):
+    def split_feats(feats: List[torch.Tensor]):
         return (F.interpolate(feats[0], scale_factor=0.5, mode='bilinear'),
                 feats[1],
                 feats[2],
@@ -345,10 +345,13 @@ class SOLOv2(nn.Module):
                 F.interpolate(feats[4], size=feats[3].shape[-2:], mode='bilinear'))
 
 
-    def inference(self, pred_cates, pred_kernels, pred_masks, cur_sizes, images):
+    def inference(self, pred_cates: List[torch.Tensor],
+            pred_kernels: List[torch.Tensor], pred_masks: torch.Tensor,
+            cur_sizes: List[Tuple[int, int]],
+            images: List[Dict[str, torch.Tensor]]) -> List[Dict[str, Instances]]:
         assert len(pred_cates) == len(pred_kernels)
 
-        results = []
+        results: List[Dict[str, Instances]] = []
         num_ins_levels = len(pred_cates)
         for img_idx in range(len(images)):
             # image size.
@@ -373,8 +376,9 @@ class SOLOv2(nn.Module):
         return results
 
     def inference_single_image(
-            self, cate_preds, kernel_preds, seg_preds, cur_size, ori_size
-    ):
+            self, cate_preds, kernel_preds, seg_preds,
+            cur_size: Tuple[int, int], ori_size: Tuple[int, int]
+    ) -> Instances:
         # overall info.
         h, w = cur_size
         f_h, f_w = seg_preds.size()[-2:]
@@ -600,7 +604,7 @@ class SOLOv2InsHead(nn.Module):
         bias_value = -math.log((1 - prior_prob) / prior_prob)
         torch.nn.init.constant_(self.cate_pred.bias, bias_value)
 
-    def forward(self, features):
+    def forward(self, features: List[torch.Tensor]):
         """
         Arguments:
             features (list[Tensor]): FPN feature map tensors in high to low resolution.
@@ -724,7 +728,7 @@ class SOLOv2MaskHead(nn.Module):
                     if l.bias is not None:
                         nn.init.constant_(l.bias, 0)
 
-    def forward(self, features):
+    def forward(self, features: List[torch.Tensor]):
         """
         Arguments:
             features (list[Tensor]): FPN feature map tensors in high to low resolution.

@@ -137,13 +137,13 @@ def center_of_mass(bitmasks):
     center_y = m01 / m00
     return center_x, center_y
 
-def point_nms(heat, kernel=2):
+def point_nms(heat, kernel: int = 2):
     # kernel must be 2
     hmax = F.max_pool2d(heat, (kernel, kernel), stride=1, padding=1)
     keep = (hmax[:, :, :-1, :-1] == heat).float()
     return heat * keep
 
-def matrix_nms(cate_labels, seg_masks, sum_masks, cate_scores, sigma=2.0, kernel='gaussian'):
+def matrix_nms(cate_labels, seg_masks, sum_masks, cate_scores, sigma: int = 2, kernel: str = 'gaussian'):
     n_samples = len(cate_labels)
     if n_samples == 0:
         return torch.empty(0)
@@ -181,7 +181,7 @@ def matrix_nms(cate_labels, seg_masks, sum_masks, cate_scores, sigma=2.0, kernel
     return cate_scores_update
 
 
-def mask_nms(cate_labels, seg_masks, sum_masks, cate_scores, nms_thr=0.5):
+def mask_nms(cate_labels, seg_masks, sum_masks, cate_scores, nms_thr: float = 0.5):
     n_samples = len(cate_scores)
     if n_samples == 0:
         return torch.empty(0)
