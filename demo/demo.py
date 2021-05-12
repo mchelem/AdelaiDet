@@ -28,6 +28,8 @@ def setup_cfg(args):
     cfg.MODEL.FCOS.INFERENCE_TH_TEST = args.confidence_threshold
     cfg.MODEL.MEInst.INFERENCE_TH_TEST = args.confidence_threshold
     cfg.MODEL.PANOPTIC_FPN.COMBINE.INSTANCES_CONFIDENCE_THRESH = args.confidence_threshold
+    cfg.MODEL.SOLOV2.SCORE_THR = args.confidence_threshold
+
     cfg.freeze()
     return cfg
 
