@@ -85,10 +85,12 @@ class SOLOv2(nn.Module):
         self.focal_loss_weight = cfg.MODEL.SOLOV2.LOSS.FOCAL_WEIGHT
 
         # image transform
-        pixel_mean = torch.Tensor(cfg.MODEL.PIXEL_MEAN).to(self.device).view(3, 1, 1)
-        pixel_std = torch.Tensor(cfg.MODEL.PIXEL_STD).to(self.device).view(3, 1, 1)
-        self.normalizer = lambda x: (x - pixel_mean) / pixel_std
+        self._pixel_mean = torch.Tensor(cfg.MODEL.PIXEL_MEAN).to(self.device).view(3, 1, 1)
+        self._pixel_std = torch.Tensor(cfg.MODEL.PIXEL_STD).to(self.device).view(3, 1, 1)
         self.to(self.device)
+
+    def normalizer(self, x):
+         return (x - self._pixel_mean) / self._pixel_std
 
     def forward(self, batched_inputs):
         """
