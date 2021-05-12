@@ -146,7 +146,7 @@ def point_nms(heat, kernel=2):
 def matrix_nms(cate_labels, seg_masks, sum_masks, cate_scores, sigma=2.0, kernel='gaussian'):
     n_samples = len(cate_labels)
     if n_samples == 0:
-        return []
+        return torch.empty(0)
 
     seg_masks = seg_masks.reshape(n_samples, -1).float()
     # inter.
@@ -184,7 +184,7 @@ def matrix_nms(cate_labels, seg_masks, sum_masks, cate_scores, sigma=2.0, kernel
 def mask_nms(cate_labels, seg_masks, sum_masks, cate_scores, nms_thr=0.5):
     n_samples = len(cate_scores)
     if n_samples == 0:
-        return []
+        return torch.empty(0)
 
     # Tensor.new_* not supported: https://github.com/pytorch/pytorch/issues/41512
     keep = torch.ones(
