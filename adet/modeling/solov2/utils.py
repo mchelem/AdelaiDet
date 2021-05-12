@@ -186,7 +186,9 @@ def mask_nms(cate_labels, seg_masks, sum_masks, cate_scores, nms_thr=0.5):
     if n_samples == 0:
         return []
 
-    keep = seg_masks.new_ones(cate_scores.shape)
+    # Tensor.new_* not supported: https://github.com/pytorch/pytorch/issues/41512
+    keep = torch.ones(
+        cate_scores.shape, dtype=seg_masks.dtype, device=seg_masks.device)
     seg_masks = seg_masks.float()
 
     for i in range(n_samples - 1):

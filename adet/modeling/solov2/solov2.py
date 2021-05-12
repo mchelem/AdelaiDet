@@ -398,8 +398,20 @@ class SOLOv2(nn.Module):
         kernel_preds = kernel_preds[inds[:, 0]]
 
         # trans vector.
-        size_trans = cate_labels.new_tensor(self.num_grids).pow(2).cumsum(0)
-        strides = kernel_preds.new_ones(size_trans[-1])
+        # Tensor.new_* not supported: https://github.com/pytorch/pytorch/issues/41512
+        # size_trans = cate_labels.new_tensor(self.num_grids).pow(2).cumsum(0)
+        # strides = kernel_preds.new_ones(size_trans[-1])
+        size_trans = torch.tensor(
+            self.num_grids,
+            dtype=cate_labels.dtype,
+            device=cate_labels.device,
+            requires_grad=cate_labels.requires_grad,
+        ).pow(2).cumsum(0)
+        strides = torch.ones(
+            size_trans[-1],
+            dtype=kernel_preds.dtype,
+            device=kernel_preds.device,
+        )
 
         n_stage = len(self.num_grids)
         strides[:size_trans[0]] *= self.instance_strides[0]
